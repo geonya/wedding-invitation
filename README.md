@@ -10,6 +10,11 @@ _220913_
 ### Todo
 
 - [x] MantineUI Provider Setup
-- [ ] Hero Section
-- [ ] Map Section
-  - [ ] Kakao Map Api Setup
+- [x] Hero Section
+- [x] Map Section
+  - [x] Kakao Map Api Setup
+  - [ ] Navigation
+- [ ] Intro Section
+- [ ] Contact
+- [ ] Gallery
+- [ ] 공유하기

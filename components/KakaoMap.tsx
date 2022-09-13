@@ -1,4 +1,4 @@
-import { Image, Modal, Text } from '@mantine/core'
+import { Button, Image, Modal, Text } from '@mantine/core'
 import { useEffect, useState } from 'react'
 
 declare global {
@@ -158,6 +158,7 @@ export default function KakaoMap() {
           </dd>
         </dl>
       </Modal>
+      <Button>Navigation</Button>
     </>
   )
 }
