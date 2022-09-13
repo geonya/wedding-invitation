@@ -1,6 +1,7 @@
 import {
   BackgroundImage,
   Box,
+  Button,
   createStyles,
   Divider,
   SimpleGrid,
@@ -79,6 +80,8 @@ const Home: NextPage = () => {
           </Text>
         </Text>
         <KakaoMap />
+        <Button>Navigation</Button>
+        <Box sx={{ height: 300 }} />
       </SimpleGrid>
     </div>
   )

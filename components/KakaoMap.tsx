@@ -23,7 +23,7 @@ export default function KakaoMap() {
             37.5608187887289,
             126.968225883547,
           ),
-          level: 3, //지도의 레벨(확대, 축소 정도)
+          level: 3,
         }
         const map = new window.kakao.maps.Map(mapContainer, mapOptions)
         const markerPosition = new window.kakao.maps.LatLng(
@@ -39,6 +39,9 @@ export default function KakaoMap() {
           // 마커 위에 인포윈도우를 표시합니다
           setOpened(true)
         })
+
+        const zoomControl = new window.kakao.maps.ZoomControl()
+        map.addControl(zoomControl, window.kakao.maps.ControlPosition.RIGHT)
       })
     }
     mapScript.addEventListener('load', onLoadKakaoMap)
