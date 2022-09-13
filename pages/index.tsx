@@ -8,7 +8,6 @@ import {
   useMantineTheme,
 } from '@mantine/core'
 import type { NextPage } from 'next'
-import { useEffect } from 'react'
 import KakaoMap from '../components/KakaoMap'
 import heroImage from '../public/images/LEE_0294.jpg'
 
