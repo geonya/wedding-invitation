@@ -9,7 +9,7 @@ import {
 } from '@mantine/core'
 import type { NextPage } from 'next'
 import KakaoMap from '../components/KakaoMap'
-import heroImage from '../public/images/LEE_0294.jpg'
+import heroImage from '../public/images/hero-image.jpg'
 
 const useStyles = createStyles((theme) => ({
   container: {
