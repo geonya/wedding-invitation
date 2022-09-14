@@ -6,10 +6,10 @@ import Sakura from '../lib/sakura'
 import { useEffect } from 'react'
 
 function MyApp({ Component, pageProps }: AppProps) {
-  // flower
+  //flower
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      new Sakura('body')
+      new Sakura('main')
     }
   }, [])
   return (
@@ -31,7 +31,9 @@ function MyApp({ Component, pageProps }: AppProps) {
           },
         }}
       >
-        <Component {...pageProps} />
+        <div id='main'>
+          <Component {...pageProps} />
+        </div>
       </MantineProvider>
     </>
   )

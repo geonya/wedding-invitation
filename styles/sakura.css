@@ -374,8 +374,7 @@
 }
 
 .sakura {
-  top: 0;
-  left: 0;
+  overflow-x: hidden;
   pointer-events: none;
   position: absolute;
 }
