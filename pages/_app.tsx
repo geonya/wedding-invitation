@@ -4,6 +4,7 @@ import Head from 'next/head'
 import { MantineProvider, ScrollArea } from '@mantine/core'
 import Sakura from '../lib/sakura'
 import { useEffect } from 'react'
+import GlobalStyles from '../styles/GlobalStyles'
 
 function MyApp({ Component, pageProps }: AppProps) {
   //flower
@@ -31,7 +32,8 @@ function MyApp({ Component, pageProps }: AppProps) {
           },
         }}
       >
-        <div id='main'>
+        <GlobalStyles />
+        <div id='main' style={{ overflow: 'hidden', position: 'relative' }}>
           <Component {...pageProps} />
         </div>
       </MantineProvider>

@@ -9,10 +9,9 @@ export default function GlobalStyles() {
           overflowX: 'hidden',
         },
         body: {
-          position: 'relative',
-          overflowX: 'hidden',
           ...theme.fn.fontStyles(),
-          fontSize: theme.fontSizes.md,
+          overflowX: 'hidden',
+          fontSize: theme.fontSizes.sm,
           lineHeight: theme.lineHeight,
           color: theme.colors.gray[4],
         },
