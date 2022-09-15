@@ -68,7 +68,7 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { db } from '../lib/firebaseConfig'
-import randomEmoji from '../lib/RandomEmojis'
+import getRandomEmoji from '../lib/randomEmojis'
 
 interface CommentFormValues {
   name: string
@@ -227,7 +227,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
     const commentData = {
       ...data,
       createdAt: currentDate,
-      avatar: randomEmoji(),
+      avatar: getRandomEmoji(),
     }
     setLoading(true)
     await addDoc(collection(db, COMMENT), commentData)
