@@ -1,24 +1,31 @@
 import {
   ActionIcon,
+  Alert,
   Avatar,
   BackgroundImage,
   Box,
   Button,
+  CopyButton,
   Divider,
   Grid,
   Group,
   Image,
   Modal,
   Paper,
+  Popover,
   Space,
   Stack,
   Text,
+  Title,
   UnstyledButton,
   useMantineTheme,
 } from '@mantine/core'
 import {
+  IconAlertCircle,
   IconArrowDownCircle,
   IconBrandMessenger,
+  IconClipboard,
+  IconClipboardCheck,
   IconCurrencyWon,
   IconHeart,
   IconPhone,
@@ -127,7 +134,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
   useAnimationOffsetEffect(embla, TRANSITION_DURATION)
   return (
     <Stack
-      pb={30}
+      p={0}
       spacing='sm'
       sx={{
         position: 'relative',
@@ -144,7 +151,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         <Stack
           id='hero'
           m={0}
-          py={10}
+          p={0}
           align='center'
           justify='space-between'
           sx={{
@@ -162,15 +169,26 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
           >
             <Text
               align='center'
+              py={10}
               sx={{
-                fontSize: theme.fontSizes.lg,
+                fontSize: theme.fontSizes.md,
                 letterSpacing: 8,
                 fontWeight: 600,
+                background:
+                  'linear-gradient(to bottom,rgba(0,0,0,.5) 10%,rgba(0,0,0,0.01))',
               }}
             >
               Wedding Invitation
             </Text>
-            <Stack align='center' spacing='xs'>
+            <Stack
+              align='center'
+              spacing='xs'
+              sx={{
+                width: theme.breakpoints.xs,
+                background:
+                  'linear-gradient(to top,rgba(0,0,0,.5) 10%,rgba(0,0,0,0.01))',
+              }}
+            >
               <Text
                 align='center'
                 sx={{
@@ -212,16 +230,16 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
               >
                 아벤티움 웨딩홀
               </Text>
+              <UnstyledButton
+                sx={{
+                  color: theme.colors.gray[0],
+                }}
+                onClick={() => scrollIntoView({ alignment: 'start' })}
+              >
+                <IconArrowDownCircle size={30} opacity={0.8} />
+              </UnstyledButton>
             </Stack>
           </Stack>
-          <UnstyledButton
-            sx={{
-              color: theme.colors.gray[0],
-            }}
-            onClick={() => scrollIntoView({ alignment: 'start' })}
-          >
-            <IconArrowDownCircle size={30} opacity={0.8} />
-          </UnstyledButton>
         </Stack>
       </BackgroundImage>
 
@@ -233,13 +251,12 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         radius='md'
         withBorder
         sx={{
-          height: '100vh',
-          maxHeight: 680,
+          height: '100%',
           backgroundColor: theme.colors.gray[0],
           color: theme.colors.dark[4],
         }}
       >
-        <Image src='/flower.svg' alt='flower' width={300} mx='auto' mb='xl' />
+        <Image src='/flower.svg' alt='flower' width={250} mx='auto' mb='xl' />
         <Text
           align='center'
           sx={(theme) => ({
@@ -262,34 +279,74 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         <Space h='md' />
         <Group
           id='avatarWrapper'
-          position='apart'
-          px={15}
+          position='center'
+          spacing={8}
           sx={{ flexWrap: 'nowrap' }}
         >
           <Stack align='center' spacing='xs'>
             <Avatar
-              mx='auto'
               src={geonyAvatar.src}
               size='lg'
               sx={{ borderRadius: '50%' }}
               alt='geony'
             />
-            <Text align='center' size='sm'>
-              Han GeonHee
-            </Text>
-            <Group spacing={7}>
+
+            <Group id='name' spacing={5} align='flex-end'>
+              <Text size='xs'>장남</Text>
+              <Text size='sm'>한건희</Text>
+            </Group>
+            <Group spacing={7} sx={{ flexWrap: 'nowrap' }}>
               <ActionIcon component={NextLink} href='tel:010-8291-8410'>
                 <IconPhone size={20} />
               </ActionIcon>
-              <ActionIcon>
+              <ActionIcon
+                component='a'
+                href='http://qr.kakao.com/talk/Mm4aPLwBR24Be2z78zCmsWJvZ9o-'
+                target='_blank'
+              >
                 <IconBrandMessenger size={20} />
               </ActionIcon>
-              <ActionIcon>
-                <IconCurrencyWon size={20} />
-              </ActionIcon>
+              <Popover
+                width={140}
+                position='bottom'
+                withArrow
+                shadow='md'
+                radius='md'
+              >
+                <Popover.Target>
+                  <ActionIcon>
+                    <IconCurrencyWon size={20} />
+                  </ActionIcon>
+                </Popover.Target>
+                <Popover.Dropdown p={5} px={10}>
+                  <Stack
+                    spacing={2}
+                    sx={{ position: 'relative' }}
+                    align='flex-end'
+                  >
+                    <Text size={theme.fontSizes.xs}>3333016916848 </Text>
+                    <Text size={theme.fontSizes.xs}>카카오뱅크 한건희</Text>
+                  </Stack>
+                  <Box sx={{ position: 'absolute', top: 10, left: 5 }}>
+                    <CopyButton value='3333016916848 카카오뱅크'>
+                      {({ copied, copy }) =>
+                        copied ? (
+                          <ActionIcon onClick={copy} color='teal'>
+                            <IconClipboardCheck size={20} />
+                          </ActionIcon>
+                        ) : (
+                          <ActionIcon onClick={copy} color='blue'>
+                            <IconClipboard size={20} />
+                          </ActionIcon>
+                        )
+                      }
+                    </CopyButton>
+                  </Box>
+                </Popover.Dropdown>
+              </Popover>
             </Group>
             <Stack spacing={0}>
-              <Group spacing={5}>
+              <Group spacing={5} sx={{ flexWrap: 'nowrap' }}>
                 <Text size='xs'>아버지 : 한상기</Text>
                 <ActionIcon component={NextLink} href='tel:010-2248-8410'>
                   <IconPhone size={15} />
@@ -313,37 +370,77 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
               sx={{ borderRadius: '50%' }}
               alt='geony'
             />
-            <Text align='center' size='sm'>
-              Lee Bora
-            </Text>
-            <Group spacing={7}>
+            <Group id='name' spacing={5} align='flex-end'>
+              <Text size='xs'>차녀</Text>
+              <Text size='sm'>이보라</Text>
+            </Group>
+            <Group spacing={7} sx={{ flexWrap: 'nowrap' }}>
               <ActionIcon component={NextLink} href='tel:010-5053-1676'>
                 <IconPhone size={20} />
               </ActionIcon>
-              <ActionIcon>
+              <ActionIcon
+                component='a'
+                href='http://qr.kakao.com/talk/Mm4aPLwBR24Be2z78zCmsWJvZ9o-'
+                target='_blank'
+              >
                 <IconBrandMessenger size={20} />
               </ActionIcon>
-              <ActionIcon>
-                <IconCurrencyWon size={20} />
-              </ActionIcon>
+              <Popover
+                width={140}
+                position='bottom'
+                withArrow
+                shadow='md'
+                radius='md'
+              >
+                <Popover.Target>
+                  <ActionIcon>
+                    <IconCurrencyWon size={20} />
+                  </ActionIcon>
+                </Popover.Target>
+                <Popover.Dropdown p={5} px={10}>
+                  <Stack
+                    spacing={2}
+                    sx={{ position: 'relative' }}
+                    align='flex-end'
+                  >
+                    <Text size={theme.fontSizes.xs}>110-356-446903</Text>
+                    <Text size={theme.fontSizes.xs}>신한은행 이보라</Text>
+                  </Stack>
+                  <Box sx={{ position: 'absolute', top: 10, left: 5 }}>
+                    <CopyButton value='110-356-446903 신한은행'>
+                      {({ copied, copy }) =>
+                        copied ? (
+                          <ActionIcon onClick={copy} color='teal'>
+                            <IconClipboardCheck size={20} />
+                          </ActionIcon>
+                        ) : (
+                          <ActionIcon onClick={copy} color='blue'>
+                            <IconClipboard size={20} />
+                          </ActionIcon>
+                        )
+                      }
+                    </CopyButton>
+                  </Box>
+                </Popover.Dropdown>
+              </Popover>
             </Group>
             <Stack spacing={0}>
               <Group spacing={5}>
                 <Text size='xs'>아버지 : 이호성</Text>
-                <ActionIcon component={NextLink} href='tel:010-2248-8410'>
+                <ActionIcon component={NextLink} href='tel:010-6810-0662'>
                   <IconPhone size={15} />
                 </ActionIcon>
               </Group>
               <Group spacing={5}>
-                <Text size='xs'>어머니 : </Text>
-                <ActionIcon component={NextLink} href='tel:010-9243-8410'>
+                <Text size='xs'>어머니 : 김미자</Text>
+                <ActionIcon component={NextLink} href='tel:010-6754-0654'>
                   <IconPhone size={15} />
                 </ActionIcon>
               </Group>
             </Stack>
           </Stack>
         </Group>
-        <Image src='/flower2.svg' alt='flower' width={300} mx='auto' mt={9} />
+        <Image src='/flower2.svg' alt='flower' width={250} mx='auto' mt={9} />
       </Paper>
       <Paper
         shadow='sm'
@@ -383,102 +480,128 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
           {slides}
         </Carousel>
       </Modal>
-      <Stack align='center'>
-        <Text
-          align='center'
-          id='location'
-          sx={{ fontSize: theme.fontSizes.sm, fontWeight: 300 }}
-        >
-          2022 . 11 . 12 . AM 11 : 00 아벤티움 웨딩홀
-          <Text sx={{ fontSize: theme.fontSizes.xs, fontWeight: 300 }}>
-            (서울 중구 청파로 464 브라운스톤서울 3층)
+      <Paper
+        shadow='sm'
+        p='sm'
+        py='md'
+        mb='xl'
+        radius='md'
+        withBorder
+        sx={{
+          backgroundColor: theme.colors.gray[0],
+          color: theme.colors.dark[4],
+        }}
+      >
+        <Stack align='center'>
+          <Text sx={{ fontSize: theme.fontSizes.xl, fontWeight: 300 }}>
+            Location
           </Text>
-        </Text>
-        <KakaoMap />
-        <Text
-          align='center'
-          sx={(theme) => ({
-            fontSize: theme.fontSizes.xs,
-          })}
-        >
-          별관(서소문공원)주차장을 이용하시면 <br /> 더욱 여유롭게 주차장을
-          이용하실 수 있습니다.
-        </Text>
+          <Text sx={{ fontSize: theme.fontSizes.md, fontWeight: 400 }}>
+            2022 . 11 . 12 (토) AM 11 : 00
+          </Text>
+          <Text
+            align='center'
+            id='location'
+            sx={{ fontSize: theme.fontSizes.md, fontWeight: 400 }}
+          >
+            아벤티움 웨딩홀
+            <Text sx={{ fontSize: theme.fontSizes.sm, fontWeight: 300 }}>
+              (서울 중구 청파로 464 브라운스톤서울 3층)
+            </Text>
+          </Text>
+          <KakaoMap />
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            px={15}
+            py={7}
+            title='주차 안내'
+            sx={{ width: '90%' }}
+          >
+            <Text
+              sx={(theme) => ({
+                fontSize: theme.fontSizes.xs,
+              })}
+            >
+              건물 지하에 주차 가능하며 <br />
+              별관(서소문공원)주차장을 이용하시면 <br /> 더욱 여유롭게 주차장을
+              이용하실 수 있습니다.
+            </Text>
+          </Alert>
 
-        <Button
-          color='cyan'
-          sx={{ width: '80%' }}
-          mb={-10}
-          onClick={() => setLocationInfo(true)}
-        >
-          🚍 오시는길
-        </Button>
-        <Button
-          color='green'
-          sx={{ width: '80%' }}
-          onClick={() => setNavigation(true)}
-        >
-          🚘 네비게이션
-        </Button>
-
-        <Modal
-          opened={navigation}
-          onClose={() => setNavigation(false)}
-          centered
-          size={200}
-          withCloseButton={false}
-          styles={{
-            modal: {
-              background: theme.fn.rgba(theme.white, 0.5),
-            },
-            close: {
-              backgroundColor: theme.fn.rgba(theme.white, 0.5),
-              color: theme.colors.dark[4],
-              borderRadius: '50%',
-            },
-            title: {
-              margin: '0 auto',
-            },
-          }}
-        >
-          <Group position='center' spacing='xl'>
-            <Image
-              src='/kakaomap.png'
-              width={50}
-              alt='kakaomap'
-              onClick={() =>
-                router.push(
-                  'https://map.kakao.com/link/to/아벤티움웨딩홀,37.5608187887289,126.968225883547',
-                )
-              }
-            />
-            <Image
-              src='/navermap.png'
-              width={50}
-              alt='navermap'
-              onClick={() =>
-                router.push(
-                  'nmap://navigation?dlat=37.5608187887289&dlng=126.968225883547&dname=아벤티움웨딩홀&appname=http://localhost:3000',
-                )
-              }
-            />
-          </Group>
-        </Modal>
-        <Modal
-          title='아벤티움 웨딩홀 오시는 길'
-          opened={locationInfo}
-          onClose={() => setLocationInfo(false)}
-          size='sm'
-          overflow='inside'
-          styles={{
-            title: {
-              margin: '0 auto',
-            },
-          }}
-        >
-          <LocationModal />
-        </Modal>
-      </Stack>
+          <Button
+            color='cyan'
+            sx={{ width: '80%' }}
+            mb={-10}
+            onClick={() => setLocationInfo(true)}
+          >
+            🚍 오시는길
+          </Button>
+          <Button
+            color='green'
+            sx={{ width: '80%' }}
+            onClick={() => setNavigation(true)}
+          >
+            🚘 네비게이션
+          </Button>
+        </Stack>
+      </Paper>
+      <Modal
+        opened={navigation}
+        onClose={() => setNavigation(false)}
+        centered
+        size={200}
+        withCloseButton={false}
+        styles={{
+          modal: {
+            background: theme.fn.rgba(theme.white, 0.5),
+          },
+          close: {
+            backgroundColor: theme.fn.rgba(theme.white, 0.5),
+            color: theme.colors.dark[4],
+            borderRadius: '50%',
+          },
+          title: {
+            margin: '0 auto',
+          },
+        }}
+      >
+        <Group position='center' spacing='xl'>
+          <Image
+            src='/kakaomap.png'
+            width={50}
+            alt='kakaomap'
+            onClick={() =>
+              router.push(
+                'https://map.kakao.com/link/to/아벤티움웨딩홀,37.5608187887289,126.968225883547',
+              )
+            }
+          />
+          <Image
+            src='/navermap.png'
+            width={50}
+            alt='navermap'
+            onClick={() =>
+              router.push(
+                'nmap://navigation?dlat=37.5608187887289&dlng=126.968225883547&dname=아벤티움웨딩홀&appname=http://localhost:3000',
+              )
+            }
+          />
+        </Group>
+      </Modal>
+      <Modal
+        title='아벤티움 웨딩홀 오시는 길'
+        opened={locationInfo}
+        onClose={() => setLocationInfo(false)}
+        size='sm'
+        overflow='inside'
+        styles={{
+          title: {
+            margin: '0 auto',
+          },
+        }}
+      >
+        <LocationModal />
+      </Modal>
     </Stack>
   )
 }
