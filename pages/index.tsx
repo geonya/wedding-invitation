@@ -125,56 +125,41 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
   }
 
   const imagesGrid = images.map((image, i) => {
+    const IMAGE = (
+      <Image
+        src={`/pictures/${image}`}
+        alt='wedding'
+        sx={{ width: '100%', cursor: 'pointer' }}
+        radius='sm'
+        onClick={() => {
+          selectImage(image)
+        }}
+      />
+    )
     if (i === 0) {
       return (
         <Grid.Col key={i} span={12}>
-          <Image
-            src={`/pictures/${image}`}
-            alt='wedding'
-            sx={{ width: '100%', cursor: 'pointer' }}
-            radius='sm'
-            onClick={() => {
-              selectImage(image)
-            }}
-          />
+          {IMAGE}
         </Grid.Col>
       )
     }
-    if (i === 1 || i === 2) {
+    if (i === images.length - 1) {
       return (
-        <Grid.Col key={i} span={6}>
-          <Image
-            src={`/pictures/${image}`}
-            alt='wedding'
-            sx={{ width: '100%', cursor: 'pointer' }}
-            radius='sm'
-            onClick={() => selectImage(image)}
-          />
+        <Grid.Col key={i} span={12}>
+          {IMAGE}
         </Grid.Col>
       )
     }
-    if (i >= images.length - 4) {
+    if (image.includes('wide')) {
       return (
         <Grid.Col key={i} span={6}>
-          <Image
-            src={`/pictures/${image}`}
-            alt='wedding'
-            sx={{ width: '100%', cursor: 'pointer' }}
-            radius='sm'
-            onClick={() => selectImage(image)}
-          />
+          {IMAGE}
         </Grid.Col>
       )
     }
     return (
       <Grid.Col key={i} span={4}>
-        <Image
-          src={`/pictures/${image}`}
-          alt='wedding'
-          sx={{ width: '100%', cursor: 'pointer' }}
-          radius='sm'
-          onClick={() => selectImage(image)}
-        />
+        {IMAGE}
       </Grid.Col>
     )
   })
@@ -311,7 +296,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
 
   const onDeleteComment = async (id?: string) => {
     if (!id) return
-    const ok = window.confirm('Are you sure? ')
+    const ok = window.confirm('정말 삭제하시겠습니까? ')
     if (ok) {
       setLoading(true)
       await deleteDoc(doc(db, COMMENT, id))
@@ -809,7 +794,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
           <Transition
             mounted={commentInputOpened}
             transition='fade'
-            duration={400}
+            duration={500}
             timingFunction='ease'
           >
             {(styles) => (
