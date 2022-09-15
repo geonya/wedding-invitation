@@ -1,19 +1,12 @@
 import { Modal } from '@mantine/core'
 import { useEffect, useState } from 'react'
 import LocationModal from './LocationModal'
-
-declare global {
-  interface Window {
-    kakao: any
-  }
-}
-
 export default function KakaoMap() {
   const [opened, setOpened] = useState(false)
   useEffect(() => {
     const mapScript = document.createElement('script')
     mapScript.async = true
-    mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY}&autoload=false&libr/aries=services`
+    mapScript.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_APP_KEY}&autoload=false&libr/aries=services`
     document.head.appendChild(mapScript)
     const onLoadKakaoMap = () => {
       window.kakao.maps.load(() => {

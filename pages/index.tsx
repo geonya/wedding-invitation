@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Alert,
+  Anchor,
   Avatar,
   BackgroundImage,
   Box,
@@ -16,7 +17,6 @@ import {
   Space,
   Stack,
   Text,
-  Title,
   UnstyledButton,
   useMantineTheme,
 } from '@mantine/core'
@@ -28,7 +28,9 @@ import {
   IconClipboardCheck,
   IconCurrencyWon,
   IconHeart,
+  IconLink,
   IconPhone,
+  IconShare,
 } from '@tabler/icons'
 import type { GetStaticProps, NextPage } from 'next'
 import KakaoMap from '../components/KakaoMap'
@@ -43,6 +45,7 @@ import { useScrollIntoView } from '@mantine/hooks'
 import { useRouter } from 'next/router'
 import LocationModal from '../components/LocationModal'
 import { NextLink } from '@mantine/next'
+import { kakaoShare } from '../lib/KakaoShare'
 
 const TRANSITION_DURATION = 200
 
@@ -62,6 +65,8 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
   const [embla, setEmbla] = useState<Embla | null>(null)
   const [navigation, setNavigation] = useState(false)
   const [locationInfo, setLocationInfo] = useState(false)
+  const [share, setShare] = useState(false)
+
   const selectImage = (image: string) => {
     const copiedImages = [...images]
     const index = copiedImages.findIndex((item) => item === image)
@@ -70,6 +75,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
     setImagesArray(sortedImages)
     setSelectedImage(image)
   }
+
   const imagesGrid = images.map((image, i) => {
     if (i === 0) {
       return (
@@ -132,9 +138,11 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
     </Carousel.Slide>
   ))
   useAnimationOffsetEffect(embla, TRANSITION_DURATION)
+
   return (
     <Stack
       p={0}
+      justify='center'
       spacing='sm'
       sx={{
         position: 'relative',
@@ -143,10 +151,9 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         width: '100%',
         overflowX: 'hidden',
         overflowY: 'scroll',
-        fontWeight: 400,
-        color: theme.colors.dark[4],
       }}
     >
+      {/* Hero */}
       <BackgroundImage src={heroImage.src}>
         <Stack
           id='hero'
@@ -181,8 +188,10 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
               Wedding Invitation
             </Text>
             <Stack
+              id='heroBottom'
               align='center'
               spacing='xs'
+              pb={5}
               sx={{
                 width: theme.breakpoints.xs,
                 background:
@@ -243,10 +252,13 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         </Stack>
       </BackgroundImage>
 
+      <Divider variant='dotted' mx={10} ref={targetRef} />
+
+      {/* Avatar Info */}
       <Paper
-        ref={targetRef}
         shadow='sm'
         px='sm'
+        mx={5}
         py={5}
         radius='md'
         withBorder
@@ -380,7 +392,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
               </ActionIcon>
               <ActionIcon
                 component='a'
-                href='http://qr.kakao.com/talk/Mm4aPLwBR24Be2z78zCmsWJvZ9o-'
+                href='http://qr.kakao.com/talk/2ctFYX5Xt_Y2GB90Wn5MUJAI0L0-'
                 target='_blank'
               >
                 <IconBrandMessenger size={20} />
@@ -426,7 +438,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
             </Group>
             <Stack spacing={0}>
               <Group spacing={5}>
-                <Text size='xs'>아버지 : 이호성</Text>
+                <Text size='xs'>아버지 : 이호명</Text>
                 <ActionIcon component={NextLink} href='tel:010-6810-0662'>
                   <IconPhone size={15} />
                 </ActionIcon>
@@ -442,8 +454,13 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         </Group>
         <Image src='/flower2.svg' alt='flower' width={250} mx='auto' mt={9} />
       </Paper>
+
+      <Divider variant='dotted' mx={10} />
+
+      {/* Photo Grid */}
       <Paper
         shadow='sm'
+        mx={5}
         p='sm'
         py='md'
         radius='md'
@@ -458,6 +475,9 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         </Grid>
       </Paper>
 
+      <Divider variant='dotted' mx={10} />
+
+      {/* Photo Slide Modal */}
       <Modal
         opened={Boolean(selectedImage)}
         size='370px'
@@ -480,11 +500,14 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
           {slides}
         </Carousel>
       </Modal>
+
+      {/* Bottom */}
       <Paper
+        mx={5}
         shadow='sm'
         p='sm'
         py='md'
-        mb='xl'
+        mb={10}
         radius='md'
         withBorder
         sx={{
@@ -493,9 +516,6 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         }}
       >
         <Stack align='center'>
-          <Text sx={{ fontSize: theme.fontSizes.xl, fontWeight: 300 }}>
-            Location
-          </Text>
           <Text sx={{ fontSize: theme.fontSizes.md, fontWeight: 400 }}>
             2022 . 11 . 12 (토) AM 11 : 00
           </Text>
@@ -527,24 +547,33 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
               이용하실 수 있습니다.
             </Text>
           </Alert>
-
+          <Group sx={{ width: '100%' }} position='center'>
+            <Button
+              color='blue.5'
+              sx={{ width: '40%' }}
+              onClick={() => setLocationInfo(true)}
+            >
+              🚍 오시는길
+            </Button>
+            <Button
+              color='green.5'
+              sx={{ width: '40%' }}
+              onClick={() => setNavigation(true)}
+            >
+              🚘 네비게이션
+            </Button>
+          </Group>
           <Button
-            color='cyan'
-            sx={{ width: '80%' }}
-            mb={-10}
-            onClick={() => setLocationInfo(true)}
+            color='yellow.5'
+            sx={{ width: '84%' }}
+            onClick={() => setShare(true)}
           >
-            🚍 오시는길
-          </Button>
-          <Button
-            color='green'
-            sx={{ width: '80%' }}
-            onClick={() => setNavigation(true)}
-          >
-            🚘 네비게이션
+            <IconShare size={15} /> <Text ml={5}>공유하기</Text>
           </Button>
         </Stack>
       </Paper>
+
+      {/* Navigation */}
       <Modal
         opened={navigation}
         onClose={() => setNavigation(false)}
@@ -566,28 +595,34 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         }}
       >
         <Group position='center' spacing='xl'>
-          <Image
-            src='/kakaomap.png'
-            width={50}
-            alt='kakaomap'
-            onClick={() =>
-              router.push(
-                'https://map.kakao.com/link/to/아벤티움웨딩홀,37.5608187887289,126.968225883547',
-              )
-            }
-          />
-          <Image
-            src='/navermap.png'
-            width={50}
-            alt='navermap'
-            onClick={() =>
-              router.push(
-                'nmap://navigation?dlat=37.5608187887289&dlng=126.968225883547&dname=아벤티움웨딩홀&appname=http://localhost:3000',
-              )
-            }
-          />
+          <ActionIcon sx={{ width: 50 }}>
+            <Image
+              src='/kakaotalk.png'
+              width={50}
+              alt='kakaomap'
+              onClick={() =>
+                router.push(
+                  'https://map.kakao.com/link/to/아벤티움웨딩홀,37.5608187887289,126.968225883547',
+                )
+              }
+            />
+          </ActionIcon>
+          <ActionIcon sx={{ width: 50 }}>
+            <Image
+              src='/navermap.png'
+              width={50}
+              alt='navermap'
+              onClick={() =>
+                router.push(
+                  'nmap://navigation?dlat=37.5608187887289&dlng=126.968225883547&dname=아벤티움웨딩홀&appname=http://localhost:3000',
+                )
+              }
+            />
+          </ActionIcon>
         </Group>
       </Modal>
+
+      {/* 오시는 길 Modal */}
       <Modal
         title='아벤티움 웨딩홀 오시는 길'
         opened={locationInfo}
@@ -602,6 +637,66 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
       >
         <LocationModal />
       </Modal>
+
+      {/* Share */}
+      <Modal
+        opened={share}
+        onClose={() => setShare(false)}
+        centered
+        size={250}
+        withCloseButton={false}
+        styles={{
+          modal: {
+            background: theme.fn.rgba(theme.white, 0.5),
+          },
+          close: {
+            backgroundColor: theme.fn.rgba(theme.white, 0.5),
+            color: theme.colors.dark[4],
+            borderRadius: '50%',
+          },
+          title: {
+            margin: '0 auto',
+          },
+        }}
+      >
+        <Group position='center' spacing='xl'>
+          <ActionIcon sx={{ width: 50 }}>
+            <Image
+              src='/facebook.png'
+              width={50}
+              alt='kakaotalk'
+              onClick={() => router.push('/')}
+            />
+          </ActionIcon>
+          <ActionIcon sx={{ width: 50 }} onClick={() => kakaoShare()}>
+            <Image
+              src='/kakaotalk.png'
+              width={50}
+              alt='kakaotalk'
+              onClick={() => router.push('/')}
+            />
+          </ActionIcon>
+          <ActionIcon
+            sx={{
+              width: 50,
+              height: 50,
+              backgroundColor: theme.colors.green[5],
+            }}
+          >
+            <IconLink size={40} color='white' />
+          </ActionIcon>
+        </Group>
+      </Modal>
+
+      {/* Footer */}
+      <Anchor
+        align='center'
+        href='https://github.com/geonya'
+        mb={30}
+        color='gray'
+      >
+        Made by Geony 🚀
+      </Anchor>
     </Stack>
   )
 }
