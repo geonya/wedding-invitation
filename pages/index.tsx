@@ -303,6 +303,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
     await updateDoc(doc(db, COMMENT, selectedComment.id), {
       selectedComment,
       ...data,
+      avatar: getRandomEmoji(),
     })
     setLoading(false)
     setCommentEditModalOpened(false)
@@ -815,7 +816,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
               <Box
                 style={styles}
                 p={5}
-                pb={10}
+                py={20}
                 sx={{
                   backgroundColor: theme.colors.gray[2],
                   borderRadius: theme.radius.md,
@@ -823,56 +824,59 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
                 }}
               >
                 <form onSubmit={form.onSubmit(commentOnSubmit)}>
-                  <Group sx={{ width: 300, height: 80 }} spacing={0}>
-                    <TextInput
-                      placeholder='성함을 입력해주세요.'
-                      label='성함'
-                      minLength={2}
-                      maxLength={10}
-                      withAsterisk
-                      {...form.getInputProps('name')}
-                      sx={{
-                        width: 180,
-                      }}
-                    />
-                    <PasswordInput
-                      label='비밀번호'
-                      withAsterisk
-                      ml={10}
-                      minLength={4}
-                      maxLength={8}
-                      sx={{ width: 98 }}
-                      {...form.getInputProps('password')}
-                    />
-                    <CloseButton
-                      size='lg'
-                      sx={{ position: 'absolute', top: 5, right: 5 }}
-                      onClick={() => setCommentInputOpened(false)}
-                    />
-                  </Group>
-                  <Group spacing={0}>
-                    <Textarea
-                      placeholder='축하 인사말을 작성해주세요.'
-                      withAsterisk
-                      {...form.getInputProps('payload')}
-                      sx={{
-                        width: 290,
-                      }}
-                      m={0}
-                    />
-                    <Button
-                      disabled={loading}
-                      type='submit'
-                      p={0}
-                      ml={10}
-                      sx={{
-                        width: 50,
-                        height: 60,
-                      }}
-                    >
-                      입력
-                    </Button>
-                  </Group>
+                  <Stack spacing={10}>
+                    <Group spacing={0} position='center'>
+                      <TextInput
+                        placeholder='성함을 입력해주세요.'
+                        label='성함'
+                        minLength={2}
+                        maxLength={10}
+                        withAsterisk
+                        {...form.getInputProps('name')}
+                        sx={{
+                          width: 180,
+                        }}
+                      />
+                      <PasswordInput
+                        label='비밀번호'
+                        withAsterisk
+                        ml={10}
+                        minLength={4}
+                        maxLength={8}
+                        sx={{ width: 98 }}
+                        {...form.getInputProps('password')}
+                      />
+                      <CloseButton
+                        size='lg'
+                        sx={{ position: 'absolute', top: 5, right: 5 }}
+                        onClick={() => setCommentInputOpened(false)}
+                      />
+                    </Group>
+                    <Stack align='center' spacing={10}>
+                      <Textarea
+                        placeholder='축하 인사말을 작성해주세요.'
+                        withAsterisk
+                        {...form.getInputProps('payload')}
+                        sx={{
+                          width: 290,
+                        }}
+                        m={0}
+                      />
+
+                      <Button
+                        disabled={loading}
+                        type='submit'
+                        mr={20}
+                        sx={{
+                          alignSelf: 'flex-end',
+                          width: 90,
+                          height: 35,
+                        }}
+                      >
+                        입력
+                      </Button>
+                    </Stack>
+                  </Stack>
                 </form>
               </Box>
             )}
@@ -954,7 +958,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         <Group position='center' spacing='xl'>
           <ActionIcon sx={{ width: 50 }}>
             <Image
-              src='/kakaotalk.png'
+              src='/kakaomap.png'
               width={50}
               alt='kakaomap'
               onClick={() =>

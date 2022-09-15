@@ -44,6 +44,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             lg: 1000,
             xl: 1200,
           },
+          fontFamily: 'Noto Sans KR',
         }}
       >
         <GlobalStyles />

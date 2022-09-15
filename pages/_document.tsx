@@ -20,6 +20,16 @@ export default class _Document extends Document {
             property='og:description'
             content='11월 12일 (토) 11시 아벤티움 웨딩홀'
           />
+          <link rel='preconnect' href='https://fonts.googleapis.com' />
+          <link
+            rel='preconnect'
+            href='https://fonts.gstatic.com'
+            crossOrigin='anonymous'
+          />
+          <link
+            href='https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap'
+            rel='stylesheet'
+          />
         </Head>
         <body>
           {/* Facebook Share Init */}

@@ -17,5 +17,6 @@ _220913_
 - [x] Intro Section
 - [x] Contact
 - [x] Gallery Grid & Slider
-- [x] 공유하기
-- [ ] Comment with Firebase
+- [x] Share with kakao / facebook / url
+- [x] Comment with Firebase
+- [ ]
