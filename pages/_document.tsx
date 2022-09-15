@@ -6,7 +6,7 @@ export default class _Document extends Document {
       <Html>
         <Head>
           <script defer src='https://developers.kakao.com/sdk/js/kakao.js' />
-          <meta property='og:url' content='https://geony-bora.vercel.app/' />
+          <meta property='og:url' content='https://geony-bora.vercel.app' />
           <meta
             property='og:title'
             content='한건희 ❤️ 이보라 우리 결혼합니다!'
@@ -22,6 +22,14 @@ export default class _Document extends Document {
           />
         </Head>
         <body>
+          {/* Facebook Share Init */}
+          <script
+            async
+            defer
+            crossOrigin='anonymous'
+            src='https://connect.facebook.net/ko_KR/sdk.js#xfbml=1&version=v14.0'
+            nonce='Sd4w7zOx'
+          ></script>
           <Main />
           <NextScript />
         </body>

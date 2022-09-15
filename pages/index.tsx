@@ -6,17 +6,23 @@ import {
   BackgroundImage,
   Box,
   Button,
+  CloseButton,
   CopyButton,
   Divider,
   Grid,
   Group,
   Image,
   Modal,
+  Notification,
   Paper,
+  PasswordInput,
   Popover,
   Space,
   Stack,
   Text,
+  Textarea,
+  TextInput,
+  Transition,
   UnstyledButton,
   useMantineTheme,
 } from '@mantine/core'
@@ -24,30 +30,60 @@ import {
   IconAlertCircle,
   IconArrowDownCircle,
   IconBrandMessenger,
+  IconCheck,
   IconClipboard,
   IconClipboardCheck,
   IconCurrencyWon,
+  IconEdit,
   IconHeart,
   IconLink,
   IconPhone,
   IconShare,
+  IconUser,
+  IconWriting,
+  IconX,
 } from '@tabler/icons'
 import type { GetStaticProps, NextPage } from 'next'
 import KakaoMap from '../components/KakaoMap'
 import heroImage from '../public/images/hero-image.jpg'
 import geonyAvatar from '../public/images/geony-profile.jpeg'
 import boraAvatar from '../public/images/bora-edit.jpeg'
-import { Carousel, Embla, useAnimationOffsetEffect } from '@mantine/carousel'
 import Fs from 'fs'
 import path from 'path'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useScrollIntoView } from '@mantine/hooks'
 import { useRouter } from 'next/router'
 import LocationModal from '../components/LocationModal'
 import { NextLink } from '@mantine/next'
 import { kakaoShare } from '../lib/KakaoShare'
+import { useForm } from '@mantine/form'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+} from 'firebase/firestore'
+import { db } from '../lib/firebaseConfig'
+import randomEmoji from '../lib/RandomEmojis'
 
-const TRANSITION_DURATION = 200
+interface CommentFormValues {
+  name: string
+  password: string
+  payload: string
+}
+interface IComment extends CommentFormValues {
+  id: string
+  createdAt: number
+  avatar: string
+}
+
+interface EditPwFormValues {
+  password: string
+}
 
 export const getStaticProps: GetStaticProps = () => {
   const images = Fs.readdirSync(path.join(process.cwd(), 'public/pictures'))
@@ -56,24 +92,36 @@ export const getStaticProps: GetStaticProps = () => {
   }
 }
 
+const isMatchCommentPassword = (password: string, comment: IComment) => {
+  if (comment.password === password) {
+    return true
+  }
+  return false
+}
+
+const COMMENT = 'comment'
+
 const Home: NextPage<{ images: string[] }> = ({ images }) => {
+  const sliderImageWidth = 370
   const theme = useMantineTheme()
   const router = useRouter()
   const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>()
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const [imagesArray, setImagesArray] = useState<string[]>(images)
-  const [embla, setEmbla] = useState<Embla | null>(null)
+  const [photoModalOpened, setPhotoModalOpened] = useState(false)
   const [navigation, setNavigation] = useState(false)
   const [locationInfo, setLocationInfo] = useState(false)
   const [share, setShare] = useState(false)
+  const [commentInputOpened, setCommentInputOpened] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [commentsArray, setCommentsArray] = useState<IComment[] | null>(null)
+  const [selectedComment, setSelectedComment] = useState<IComment | null>(null)
+  const [commentPasswordError, setCommentPasswordError] = useState(false)
+  const [commentPwModalOpened, setCommentPwModalOpened] = useState(false)
+  const [commentEditModalOpened, setCommentEditModalOpened] = useState(false)
 
   const selectImage = (image: string) => {
-    const copiedImages = [...images]
-    const index = copiedImages.findIndex((item) => item === image)
-    const previousImages = copiedImages.splice(0, index)
-    const sortedImages = [...copiedImages, ...previousImages]
-    setImagesArray(sortedImages)
     setSelectedImage(image)
+    setPhotoModalOpened(true)
   }
 
   const imagesGrid = images.map((image, i) => {
@@ -85,7 +133,9 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
             alt='wedding'
             sx={{ width: '100%', cursor: 'pointer' }}
             radius='sm'
-            onClick={() => selectImage(image)}
+            onClick={() => {
+              selectImage(image)
+            }}
           />
         </Grid.Col>
       )
@@ -128,16 +178,161 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
       </Grid.Col>
     )
   })
-  const slides = imagesArray.map((image, i) => (
-    <Carousel.Slide key={i} sx={{ display: 'flex', alignItems: 'center' }}>
-      <Image
-        src={`/pictures/${image}`}
-        alt='wedding'
-        sx={{ width: '100%', objectFit: 'cover' }}
-      />
-    </Carousel.Slide>
-  ))
-  useAnimationOffsetEffect(embla, TRANSITION_DURATION)
+
+  const form = useForm<CommentFormValues>({
+    initialValues: {
+      name: '',
+      password: '',
+      payload: '',
+    },
+    validate: {
+      name: (value) => {
+        if (!value) {
+          return '이름을 입력해주세요.'
+        }
+        if (value.length < 2) {
+          return '이름을 2자 이상 입력해주세요.'
+        }
+        if (value.length > 10) {
+          return '이름은 10자 이하만 가능합니다.'
+        }
+        return null
+      },
+      password: (value) => {
+        if (!value) {
+          return '비밀번호를 입력해주세요. '
+        }
+        if (value.length < 4) {
+          return '비밀번호는 4자 이상 입력해주세요.'
+        }
+        if (value.length > 8) {
+          return '비밀번호는 8자 이하로 입력해주세요.'
+        }
+        return null
+      },
+      payload: (value) => {
+        if (!value) {
+          return '내용을 입력해주세요.'
+        }
+        if (value.length > 100) {
+          return '100자 이하까지 작성 가능합니다.'
+        }
+        return null
+      },
+    },
+  })
+
+  const commentOnSubmit = async (data: CommentFormValues) => {
+    const currentDate = Date.now()
+    const commentData = {
+      ...data,
+      createdAt: currentDate,
+      avatar: randomEmoji(),
+    }
+    setLoading(true)
+    await addDoc(collection(db, COMMENT), commentData)
+    setLoading(false)
+    setCommentInputOpened(false)
+  }
+
+  const editPwForm = useForm({
+    initialValues: {
+      password: '',
+    },
+  })
+
+  const editPwFormOnSubmit = ({ password }: EditPwFormValues) => {
+    if (!commentsArray || !selectedComment) return
+    if (!isMatchCommentPassword(password, selectedComment)) {
+      setCommentPasswordError(true)
+      return
+    }
+    setCommentPwModalOpened(false)
+    setCommentEditModalOpened(true)
+    editForm.setValues({
+      ...selectedComment,
+    })
+  }
+
+  const editForm = useForm<CommentFormValues>({
+    initialValues: {
+      name: selectedComment?.name || '',
+      password: selectedComment?.password || '',
+      payload: selectedComment?.payload || '',
+    },
+    validate: {
+      name: (value) => {
+        if (!value) {
+          return '이름을 입력해주세요.'
+        }
+        if (value.length < 2) {
+          return '이름을 2자 이상 입력해주세요.'
+        }
+        if (value.length > 10) {
+          return '이름은 10자 이하만 가능합니다.'
+        }
+        return null
+      },
+      password: (value) => {
+        if (!value) {
+          return '비밀번호를 입력해주세요. '
+        }
+        if (value.length < 4) {
+          return '비밀번호는 4자 이상 입력해주세요.'
+        }
+        if (value.length > 8) {
+          return '비밀번호는 8자 이하로 입력해주세요.'
+        }
+        return null
+      },
+      payload: (value) => {
+        if (!value) {
+          return '내용을 입력해주세요.'
+        }
+        if (value.length > 100) {
+          return '100자 이하까지 작성 가능합니다.'
+        }
+        return null
+      },
+    },
+  })
+
+  const editFormOnSubmit = async (data: CommentFormValues) => {
+    if (!selectedComment) return
+    setLoading(true)
+    await updateDoc(doc(db, COMMENT, selectedComment.id), {
+      selectedComment,
+      ...data,
+    })
+    setLoading(false)
+    setCommentEditModalOpened(false)
+  }
+
+  const onDeleteComment = async (id?: string) => {
+    if (!id) return
+    const ok = window.confirm('Are you sure? ')
+    if (ok) {
+      setLoading(true)
+      await deleteDoc(doc(db, COMMENT, id))
+      setLoading(false)
+      setCommentEditModalOpened(false)
+      setCommentInputOpened(true)
+    }
+  }
+
+  useEffect(() => {
+    const commentQuery = query(
+      collection(db, COMMENT),
+      orderBy('createdAt', 'desc'),
+    )
+    onSnapshot(commentQuery, (snapshot) => {
+      const docsArray = snapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      setCommentsArray(docsArray)
+    })
+  }, [])
 
   return (
     <Stack
@@ -477,17 +672,21 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
 
       <Divider variant='dotted' mx={10} />
 
-      {/* Photo Slide Modal */}
+      {/* Photo Modal */}
       <Modal
-        opened={Boolean(selectedImage)}
-        size='370px'
+        opened={photoModalOpened}
         padding={0}
         centered
-        transitionDuration={TRANSITION_DURATION}
-        onClose={() => setSelectedImage(null)}
+        size={sliderImageWidth}
+        onClose={() => {
+          setPhotoModalOpened(false)
+        }}
         styles={{
           modal: {
             background: 'none',
+          },
+          header: {
+            height: 20,
           },
           close: {
             backgroundColor: theme.fn.rgba(theme.white, 0.5),
@@ -496,9 +695,15 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
           },
         }}
       >
-        <Carousel loop getEmblaApi={setEmbla}>
+        {/* <Carousel loop getEmblaApi={setEmbla} slideSize={sliderImageWidth + 5}>
+         
           {slides}
-        </Carousel>
+        </Carousel> */}
+        <Image
+          src={`/pictures/${selectedImage}`}
+          alt='wedding'
+          sx={{ width: sliderImageWidth, objectFit: 'cover' }}
+        />
       </Modal>
 
       {/* Bottom */}
@@ -573,7 +778,159 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         </Stack>
       </Paper>
 
-      {/* Navigation */}
+      {/* Comment Section*/}
+      <Paper
+        shadow='sm'
+        px='sm'
+        mx={5}
+        py={5}
+        radius='md'
+        withBorder
+        sx={{
+          height: '100%',
+          backgroundColor: theme.colors.gray[0],
+          color: theme.colors.dark[4],
+          position: 'relative',
+        }}
+      >
+        <ActionIcon
+          hidden={commentInputOpened}
+          color='blue'
+          sx={{ position: 'absolute', top: 10, right: 20 }}
+          onClick={() => setCommentInputOpened(true)}
+        >
+          <IconWriting size={30} />
+        </ActionIcon>
+        <Text my={10} size='md' align='center' sx={{ fontWeight: 300 }}>
+          Celebrations 🎉
+        </Text>
+        <Stack spacing={10} mb={5}>
+          <Transition
+            mounted={commentInputOpened}
+            transition='fade'
+            duration={400}
+            timingFunction='ease'
+          >
+            {(styles) => (
+              <Box
+                style={styles}
+                p={5}
+                pb={10}
+                sx={{
+                  backgroundColor: theme.colors.gray[2],
+                  borderRadius: theme.radius.md,
+                  position: 'relative',
+                }}
+              >
+                <form onSubmit={form.onSubmit(commentOnSubmit)}>
+                  <Group sx={{ width: 300, height: 80 }} spacing={0}>
+                    <TextInput
+                      placeholder='성함을 입력해주세요.'
+                      label='성함'
+                      minLength={2}
+                      maxLength={10}
+                      withAsterisk
+                      {...form.getInputProps('name')}
+                      sx={{
+                        width: 180,
+                      }}
+                    />
+                    <PasswordInput
+                      label='비밀번호'
+                      withAsterisk
+                      ml={10}
+                      minLength={4}
+                      maxLength={8}
+                      sx={{ width: 98 }}
+                      {...form.getInputProps('password')}
+                    />
+                    <CloseButton
+                      size='lg'
+                      sx={{ position: 'absolute', top: 5, right: 5 }}
+                      onClick={() => setCommentInputOpened(false)}
+                    />
+                  </Group>
+                  <Group spacing={0}>
+                    <Textarea
+                      placeholder='축하 인사말을 작성해주세요.'
+                      withAsterisk
+                      {...form.getInputProps('payload')}
+                      sx={{
+                        width: 290,
+                      }}
+                      m={0}
+                    />
+                    <Button
+                      disabled={loading}
+                      type='submit'
+                      p={0}
+                      ml={10}
+                      sx={{
+                        width: 50,
+                        height: 60,
+                      }}
+                    >
+                      입력
+                    </Button>
+                  </Group>
+                </form>
+              </Box>
+            )}
+          </Transition>
+          {commentsArray?.map((comment, i) => (
+            <Box
+              key={i}
+              id='aComment'
+              p={5}
+              style={{
+                height: '100%',
+                position: 'relative',
+                backgroundColor: theme.colors.gray[2],
+                borderRadius: theme.radius.md,
+              }}
+            >
+              <Group noWrap>
+                <Avatar color='blue' radius='xl'>
+                  {comment.avatar ? (
+                    <Text size='xl'>{comment.avatar}</Text>
+                  ) : (
+                    <IconUser size={25} />
+                  )}
+                </Avatar>
+                <Stack spacing={0}>
+                  <Group>
+                    <Text size='sm' sx={{ fontWeight: 500 }}>
+                      {comment.name}
+                    </Text>
+                    <Text size={10} color='dimmed'>
+                      {new Date(comment.createdAt).toLocaleDateString('ko')}
+                    </Text>
+                  </Group>
+                  <Text size='sm' mt={5} sx={{ lineBreak: 'anywhere' }}>
+                    {comment.payload}
+                  </Text>
+                </Stack>
+              </Group>
+              <Group
+                sx={{ position: 'absolute', top: 5, right: 5 }}
+                spacing='xs'
+              >
+                <ActionIcon
+                  color='blue'
+                  onClick={() => {
+                    setSelectedComment(comment)
+                    setCommentPwModalOpened(true)
+                  }}
+                >
+                  <IconEdit size={20} />
+                </ActionIcon>
+              </Group>
+            </Box>
+          ))}
+        </Stack>
+      </Paper>
+
+      {/* Navigation Modal */}
       <Modal
         opened={navigation}
         onClose={() => setNavigation(false)}
@@ -638,12 +995,11 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         <LocationModal />
       </Modal>
 
-      {/* Share */}
+      {/* Share Modal */}
       <Modal
         opened={share}
         onClose={() => setShare(false)}
         centered
-        size={250}
         withCloseButton={false}
         styles={{
           modal: {
@@ -660,13 +1016,22 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         }}
       >
         <Group position='center' spacing='xl'>
-          <ActionIcon sx={{ width: 50 }}>
-            <Image
-              src='/facebook.png'
-              width={50}
-              alt='kakaotalk'
-              onClick={() => router.push('/')}
-            />
+          <ActionIcon
+            sx={{ width: 50 }}
+            data-href='https://geony-bora.vercel.app'
+          >
+            <a
+              target='_blank'
+              rel='noreferrer'
+              href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;src=sdkpreparse'
+            >
+              <Image
+                src='/facebook.png'
+                width={50}
+                alt='facebook'
+                onClick={() => router.push('/')}
+              />
+            </a>
           </ActionIcon>
           <ActionIcon sx={{ width: 50 }} onClick={() => kakaoShare()}>
             <Image
@@ -676,16 +1041,186 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
               onClick={() => router.push('/')}
             />
           </ActionIcon>
-          <ActionIcon
-            sx={{
-              width: 50,
-              height: 50,
-              backgroundColor: theme.colors.green[5],
+
+          <CopyButton value='https://geony-bora.vercel.app/'>
+            {({ copied, copy }) => {
+              if (copied) {
+                return (
+                  <>
+                    <Notification
+                      icon={<IconCheck size={18} />}
+                      color='teal'
+                      sx={{
+                        width: 200,
+                        position: 'absolute',
+                        top: -60,
+                        left: 0,
+                        right: 0,
+                        margin: '0 auto',
+                        zIndex: 999,
+                      }}
+                    >
+                      주소 복사 완료
+                    </Notification>
+                    <ActionIcon
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        backgroundColor: theme.colors.red[5],
+                      }}
+                      onClick={copy}
+                    >
+                      <IconLink size={40} color='white' />
+                    </ActionIcon>
+                  </>
+                )
+              } else {
+                return (
+                  <ActionIcon
+                    sx={{
+                      width: 50,
+                      height: 50,
+                      backgroundColor: theme.colors.green[5],
+                    }}
+                    onClick={copy}
+                  >
+                    <IconLink size={40} color='white' />
+                  </ActionIcon>
+                )
+              }
             }}
-          >
-            <IconLink size={40} color='white' />
-          </ActionIcon>
+          </CopyButton>
         </Group>
+      </Modal>
+
+      {/* Comment PW Modal */}
+      <Modal
+        opened={commentPwModalOpened}
+        centered
+        withCloseButton={false}
+        onClose={() => setCommentPwModalOpened(false)}
+        size={240}
+        styles={{
+          modal: {
+            background: theme.fn.rgba(theme.white, 0.8),
+          },
+        }}
+      >
+        <form onSubmit={editPwForm.onSubmit(editPwFormOnSubmit)}>
+          <Group spacing={5} align='flex-end'>
+            <PasswordInput
+              data-autofocus
+              label='비밀번호'
+              withAsterisk
+              minLength={4}
+              maxLength={8}
+              sx={{ width: 160 }}
+              {...editPwForm.getInputProps('password')}
+            />
+            <Button
+              type='submit'
+              p={0}
+              sx={{
+                width: 35,
+                height: 35,
+              }}
+            >
+              입력
+            </Button>
+          </Group>
+        </form>
+        {commentPasswordError && (
+          <Notification
+            icon={<IconX size={18} />}
+            color='red'
+            onClose={() => setCommentPasswordError(false)}
+          >
+            비밀번호가 틀렸습니다.
+          </Notification>
+        )}
+      </Modal>
+
+      {/* Comment Edit Modal */}
+      <Modal
+        centered
+        size={340}
+        opened={commentEditModalOpened}
+        onClose={() => {
+          setCommentEditModalOpened(false)
+          setSelectedComment(null)
+        }}
+        styles={{
+          header: {
+            height: 0,
+          },
+        }}
+      >
+        <form onSubmit={editForm.onSubmit(editFormOnSubmit)}>
+          <Stack spacing={0} align='center'>
+            <Group
+              sx={{ width: 350, height: 80 }}
+              spacing={0}
+              position='center'
+            >
+              <TextInput
+                placeholder='성함을 입력해주세요.'
+                label='성함'
+                minLength={2}
+                maxLength={10}
+                withAsterisk
+                {...editForm.getInputProps('name')}
+                sx={{
+                  width: 140,
+                }}
+              />
+              <PasswordInput
+                label='비밀번호'
+                withAsterisk
+                ml={10}
+                minLength={4}
+                maxLength={8}
+                sx={{ width: 98 }}
+                {...editForm.getInputProps('password')}
+              />
+            </Group>
+            <Stack spacing={10}>
+              <Textarea
+                placeholder='축하 인사말을 작성해주세요.'
+                withAsterisk
+                {...editForm.getInputProps('payload')}
+                sx={{
+                  width: 250,
+                }}
+                m={0}
+              />
+              <Group position='apart' px={20}>
+                <Button
+                  color='red'
+                  disabled={loading}
+                  p={0}
+                  sx={{
+                    width: 90,
+                    height: 35,
+                  }}
+                  onClick={() => onDeleteComment(selectedComment?.id)}
+                >
+                  삭제 하기
+                </Button>
+                <Button
+                  disabled={loading}
+                  type='submit'
+                  p={0}
+                  sx={{
+                    width: 90,
+                    height: 35,
+                  }}
+                >
+                  수정 완료
+                </Button>
+              </Group>
+            </Stack>
+          </Stack>
+        </form>
       </Modal>
 
       {/* Footer */}
