@@ -6,6 +6,7 @@ import {
   BackgroundImage,
   Box,
   Button,
+  Center,
   CloseButton,
   CopyButton,
   Divider,
@@ -14,6 +15,7 @@ import {
   Image,
   Modal,
   Notification,
+  Overlay,
   Paper,
   PasswordInput,
   Popover,
@@ -69,6 +71,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../lib/firebaseConfig'
 import getRandomEmoji from '../lib/randomEmojis'
+import { Carousel } from '@mantine/carousel'
 
 interface CommentFormValues {
   name: string
@@ -118,11 +121,35 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
   const [commentPasswordError, setCommentPasswordError] = useState(false)
   const [commentPwModalOpened, setCommentPwModalOpened] = useState(false)
   const [commentEditModalOpened, setCommentEditModalOpened] = useState(false)
+  const [imagesArray, setImagesArray] = useState<string[]>(images)
 
   const selectImage = (image: string) => {
+    const copiedImages = [...images]
+    const index = copiedImages.findIndex((item) => item === image)
+    const previousImages = copiedImages.splice(0, index)
+    const sortedImages = [...copiedImages, ...previousImages]
+    setImagesArray(sortedImages)
     setSelectedImage(image)
     setPhotoModalOpened(true)
   }
+
+  const slides = imagesArray.map((image, i) => (
+    <Carousel.Slide
+      key={i}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Image
+        src={`/pictures/${image}`}
+        alt='wedding'
+        width={600}
+        sx={{ objectFit: 'cover' }}
+      />
+    </Carousel.Slide>
+  ))
 
   const imagesGrid = images.map((image, i) => {
     const IMAGE = (
@@ -325,11 +352,9 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
       justify='center'
       spacing='sm'
       sx={{
-        position: 'relative',
         margin: '0 auto',
         maxWidth: theme.breakpoints.xs,
         width: '100%',
-        overflowX: 'hidden',
         overflowY: 'scroll',
       }}
     >
@@ -658,7 +683,52 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
       <Divider variant='dotted' mx={10} />
 
       {/* Photo Modal */}
-      <Modal
+      {photoModalOpened && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 990,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <CloseButton
+            size='lg'
+            sx={{
+              position: 'absolute',
+              top: 30,
+              right: 30,
+              zIndex: 999,
+              backgroundColor: theme.fn.rgba(theme.white, 0.5),
+              borderRadius: '50%',
+              cursor: 'pointer',
+            }}
+            onClick={() => setPhotoModalOpened(false)}
+          />
+          <Carousel
+            loop
+            sx={{
+              width: '100%',
+              zIndex: 998,
+            }}
+          >
+            {slides}
+          </Carousel>
+          <Overlay
+            color='black'
+            onClick={() => {
+              setPhotoModalOpened(false)
+            }}
+          />
+        </div>
+      )}
+
+      {/* <Modal
         opened={photoModalOpened}
         padding={0}
         centered
@@ -680,16 +750,13 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
           },
         }}
       >
-        {/* <Carousel loop getEmblaApi={setEmbla} slideSize={sliderImageWidth + 5}>
-         
-          {slides}
-        </Carousel> */}
+       
         <Image
           src={`/pictures/${selectedImage}`}
           alt='wedding'
           sx={{ width: sliderImageWidth, objectFit: 'cover' }}
         />
-      </Modal>
+      </Modal> */}
 
       {/* Bottom */}
       <Paper
