@@ -105,11 +105,9 @@ const isMatchCommentPassword = (password: string, comment: IComment) => {
 const COMMENT = 'comment'
 
 const Home: NextPage<{ images: string[] }> = ({ images }) => {
-  const sliderImageWidth = 370
   const theme = useMantineTheme()
   const router = useRouter()
   const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>()
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [photoModalOpened, setPhotoModalOpened] = useState(false)
   const [navigation, setNavigation] = useState(false)
   const [locationInfo, setLocationInfo] = useState(false)
@@ -129,7 +127,6 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
     const previousImages = copiedImages.splice(0, index)
     const sortedImages = [...copiedImages, ...previousImages]
     setImagesArray(sortedImages)
-    setSelectedImage(image)
     setPhotoModalOpened(true)
   }
 
@@ -698,7 +695,8 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
           }}
         >
           <CloseButton
-            size='lg'
+            size={35}
+            p={5}
             sx={{
               position: 'absolute',
               top: 30,
@@ -716,6 +714,12 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
               width: '100%',
               zIndex: 998,
             }}
+            styles={{
+              control: {
+                width: 35,
+                height: 35,
+              },
+            }}
           >
             {slides}
           </Carousel>
@@ -727,36 +731,6 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
           />
         </div>
       )}
-
-      {/* <Modal
-        opened={photoModalOpened}
-        padding={0}
-        centered
-        size={sliderImageWidth}
-        onClose={() => {
-          setPhotoModalOpened(false)
-        }}
-        styles={{
-          modal: {
-            background: 'none',
-          },
-          header: {
-            height: 20,
-          },
-          close: {
-            backgroundColor: theme.fn.rgba(theme.white, 0.5),
-            color: theme.colors.dark[4],
-            borderRadius: '50%',
-          },
-        }}
-      >
-       
-        <Image
-          src={`/pictures/${selectedImage}`}
-          alt='wedding'
-          sx={{ width: sliderImageWidth, objectFit: 'cover' }}
-        />
-      </Modal> */}
 
       {/* Bottom */}
       <Paper
