@@ -14,7 +14,7 @@ export default class _Document extends Document {
           <meta property='og:type' content='website' />
           <meta
             property='og:image'
-            content='https://geony-bora.vercel.app/pictures/10.jpg'
+            content='https://geony-bora.vercel.app/pictures/a10.jpg'
           />
           <meta
             property='og:description'
