@@ -143,20 +143,19 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         </Grid.Col>
       )
     }
-    if (i === images.length - 1) {
-      return (
-        <Grid.Col key={i} span={12}>
-          {IMAGE}
-        </Grid.Col>
-      )
-    }
+
     if (image.includes('wide')) {
       return (
-        <Grid.Col key={i} span={6}>
+        <Grid.Col
+          key={i}
+          span={6}
+          sx={{ display: 'flex', alignItems: 'center' }}
+        >
           {IMAGE}
         </Grid.Col>
       )
     }
+
     return (
       <Grid.Col key={i} span={4}>
         {IMAGE}
