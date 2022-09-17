@@ -6,7 +6,7 @@ export function kakaoShare() {
     content: {
       title: '한건희 ❤️ 이보라 우리 결혼합니다!',
       description: '11월 12일 (토) 11시 아벤티움 웨딩홀',
-      imageUrl: 'https://geony-bora.vercel.app/pictures/10.jpg',
+      imageUrl: 'https://geony-bora.vercel.app/pictures/a10.jpg',
       link: {
         mobileWebUrl: 'https://geony-bora.vercel.app/',
         webUrl: 'https://geony-bora.vercel.app/',
