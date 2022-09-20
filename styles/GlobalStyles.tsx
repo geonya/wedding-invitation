@@ -15,8 +15,8 @@ export default function GlobalStyles() {
           OTextSizeAdjust: 'none' /*old versions of Opera*/,
         },
         body: {
-          ...theme.fn.fontStyles(),
           overflowX: 'hidden',
+          ...theme.fn.fontStyles(),
           fontSize: theme.fontSizes.sm,
           lineHeight: theme.lineHeight,
           color: theme.colors.gray[4],

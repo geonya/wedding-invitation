@@ -353,6 +353,7 @@ const Home: NextPage<{ images: string[] }> = ({ images }) => {
         maxWidth: theme.breakpoints.xs,
         width: '100%',
         overflowY: 'scroll',
+        overflowX: 'hidden',
       }}
     >
       {/* Hero */}
